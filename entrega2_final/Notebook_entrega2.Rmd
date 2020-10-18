@@ -1,0 +1,364 @@
+---
+title: "Análisis Univariado y Bivariado"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
+editor_options:
+  chunk_output_type: console
+---
+Importamos la data desde el repositorio de Github donde se encuentra nuestra data limpia y mergeada.
+```{r}
+library(rio)
+link="https://github.com/alessiasibille17/Trabajo_Stad/raw/master/entrega2_final/mergefinal.xlsx"
+datamerge=import(link)
+```
+Antes que nada, y para mayor orden, colocaremos los nombres de los países en row names. Asimismo activamos las librerías que usaremos y eliminaremos la columna con los países
+```{r}
+row.names(datamerge)=datamerge$Pais
+#Activamos las librerías que usaremos
+library(DescTools)
+library(psych)
+#eliminamos la columna con los países, pues estos ya se encuentran en los row names.
+datamerge$Pais= NULL
+```
+*ANÁLISIS UNIVARIADO*
+Comenzamos con nuestra variable dependiente: El porcentaje de estudiantes matriculados en educación secundaria a nivel global
+```{r}
+#Primero identificamos la variable, vemos la estructura de la data, si nuestra variable se encuentra en numérica, los estadístictos descriptivos a modo de summary.
+str(datamerge)
+class(datamerge$Matricula)
+summary(datamerge$Matricula)
+table(datamerge$Matricula)
+
+#Ahora pedimos algunos estadísticos descriptivos en particular. Si bien también los tenemos en summary, pedimos la mediana, la desviación estándar.
+median(datamerge$Matricula,na.rm=T)
+mean(datamerge$Matricula,na.rm=T)
+Mode(datamerge$Matricula,na.rm=T)
+sd(datamerge$Matricula,na.rm=T)
+prop.table(table(datamerge$Matricula))*100
+
+#Ahora, procedemos a realizar nuestro primer gráfico: Histograma de la variable
+graficomatricula <- (datamerge$Matricula)
+hist(graficomatricula, col= rainbow(10), 
+     xlab="Países",
+     ylab="Porcentaje de alumnos matriculados en la escuela secundaria",
+     main=" ALUMNOS MATRICULADOS POR PAÍS")
+
+#Haremos nuestro segundo gráfico: Boxplot de la variable. Esto nos servirá para ver cómo se distribuyen los casos.
+boxplot(datamerge$Matricula, main="BOXPLOT DE ALUMNOS MATRICULADOS POR PAÍS", col="Yellow",
+        xlab="país", ylab="Porcentaje de alumnos matriculados en la escuela secundaria")
+```
+
+```{r}
+#Retomando el tema de los estadísticos, podemos visualizarlos de una manera más clara haciendo uso del comando table1.
+library(table1)
+table1::label(datamerge$Matricula) <- "Porcentaje de alumnos matriculados en el nivel secundario"
+table1(~Matricula, data = datamerge)
+table1
+```
+
+
+Análisis univariado de variables independientes:
+1. Variable PBI per cápita por país (nominal)
+```{r}
+##Primero identificamos la variable, vemos la estructura de la data, si nuestra variable se encuentra en numérica, los estadístictos descriptivos a modo de summary.
+str(datamerge)
+class(datamerge$PBIPC)
+summary(datamerge$PBIPC)
+table(datamerge$PBIPC)
+
+#Ahora pedimos algunos estadísticos descriptivos en particular. Si bien también los tenemos en summary, pedimos la mediana, la desviación estándar.
+median(datamerge$PBIPC,na.rm=T)
+mean(datamerge$PBIPC,na.rm=T)
+Mode(datamerge$PBIPC,na.rm=T)
+sd(datamerge$PBIPC,na.rm=T)
+prop.table(table(datamerge$PBIPC))*100
+
+#Para visualizar los descriptivos de manera más clara
+table1::label(datamerge$PBIPC) <- "PBI per cápita (nominal) por país"
+table1(~PBIPC, data = datamerge, )
+
+#Ahora, procedemos a realizar nuestro primer gráfico: Histograma de la variable
+graficoPBIPC <- (datamerge$PBIPC)
+hist(graficoPBIPC, col= rainbow(10), 
+     xlab="PBI per cápita (nominal)",
+     main="PBI PER CÁPITA POR PAÍS")
+#Haremos nuestro segundo gráfico: Boxplot de la variable. Esto nos servirá para ver cómo se distribuyen los casos.
+boxplot(datamerge$PBIPC, main="BOXPLOT DE PBI PER CAPITA POR PAIS ", col="Red",xlab="países",ylab="PBI per cápita (nominal)")
+```
+
+
+
+2.Variable Porcentaje de la población bajo la línea nacional de pobreza
+```{r}
+##Primero identificamos la variable,si nuestra variable se encuentra en numérica, los estadístictos descriptivos a modo de summary.
+class(datamerge$Pobreza)
+summary(datamerge$Pobreza)
+table(datamerge$Pobreza)
+
+#Ahora pedimos algunos estadísticos descriptivos en particular. Si bien también los tenemos en summary, pedimos la mediana, la desviación estándar.
+median(datamerge$Pobreza,na.rm=T)
+mean(datamerge$Pobreza,na.rm=T)
+Mode(datamerge$Pobreza,na.rm=T)
+sd(datamerge$Pobreza,na.rm=T)
+
+
+#Para visualizar los descriptivos de manera más clara
+table1::label(datamerge$Pobreza) <- "Porcentaje de la población bajo la línea nacional de pobreza"
+table1::table1(~Pobreza, data = datamerge, )
+
+#Ahora, procedemos a realizar nuestro primer gráfico: Histograma de la variable
+graficopobreza <- (datamerge$Pobreza)
+hist(graficopobreza, col= rainbow(10), 
+     main="PORCENTAJE DE POBREZA POR PAÍS",
+     xlab="Porcentaje de la población bajo la línea nacional de pobreza",ylab="Países")
+#Haremos nuestro segundo gráfico: Boxplot de la variable. Esto nos servirá para ver cómo se distribuyen los casos.
+boxplot(datamerge$Pobreza, main="BOXPLOT DE POBREZA ", col="Blue",
+        xlab="países", ylab="Porcentaje de la población bajo la línea nacional de pobreza")
+```
+
+
+3. Variable Porcentaje de población urbana por país.
+```{r}
+##Primero identificamos la variable, si nuestra variable se encuentra en numérica, los estadístictos descriptivos a modo de summary.
+class(datamerge$URBANO)
+summary(datamerge$URBANO)
+table(datamerge$URBANO)
+
+#Ahora pedimos algunos estadísticos descriptivos en particular. Si bien también los tenemos en summary, pedimos la mediana, la desviación estándar.
+median(datamerge$URBANO,na.rm=T)
+mean(datamerge$URBANO,na.rm=T)
+Mode(datamerge$URBANO,na.rm=T)
+sd(datamerge$URBANO,na.rm=T)
+
+
+#Para visualizar los descriptivos de manera más clara
+table1::label(datamerge$URBANO) <- "Porcentaje de población urbana por país"
+table1::table1(~URBANO, data = datamerge, )
+
+#Ahora, procedemos a realizar nuestro primer gráfico: Histograma de la variable
+graficourbano <- (datamerge$URBANO)
+hist(graficourbano, col= rainbow(10), 
+     xlab="Países",
+     ylab="Porcentaje de población urbana",
+     main="PORCENTAJE DE POBLACIÓN URBANA POR PAÍS")
+#Haremos nuestro segundo gráfico: Boxplot de la variable. Esto nos servirá para ver cómo se distribuyen los casos.
+boxplot(datamerge$URBANO, main="BOXPLOT PORCENTAJE DE URBANIZACIÓN POR PAÍS ", col="light pink",
+        xlab="países", ylab="Porcentaje de urbanización")
+
+```
+
+
+4.Variable: Porcentaje de población femenina por país
+```{r}
+##Primero identificamos la variable, si nuestra variable se encuentra en numérica, los estadístictos descriptivos a modo de summary.
+class(datamerge$SEXO)
+summary(datamerge$SEXO)
+table(datamerge$SEXO)
+
+#Ahora pedimos algunos estadísticos descriptivos en particular. Si bien también los tenemos en summary, pedimos la mediana, la desviación estándar.
+median(datamerge$SEXO,na.rm=T)
+mean(datamerge$SEXO,na.rm=T)
+Mode(datamerge$SEXO,na.rm=T)
+sd(datamerge$SEXO,na.rm=T)
+
+#Para visualizar los descriptivos de manera más clara
+table1::label(datamerge$SEXO) <- "Porcentaje de población femenina"
+table1::table1(~SEXO, data = datamerge, )
+
+#Ahora, procedemos a realizar nuestro primer gráfico: Histograma de la variable
+graficosexo <- (datamerge$SEXO)
+hist(graficosexo, col= rainbow(10), 
+     xlab="Porcentaje de población femenina",
+     ylab="Países",
+     main="PORCENTAJE DE POBLACIÓN FEMENINA POR PAÍS")
+
+#Haremos nuestro segundo gráfico: Boxplot de la variable. Esto nos servirá para ver cómo se distribuyen los casos.
+boxplot(datamerge$SEXO, main="BOXPLOT PORCENTAJE DE POBLACIÓN FEMENINA POR PAÍS ", col="orchid",
+        xlab="países", ylab="Porcentaje de población femenina")
+```
+
+
+5.Variable Porcentaje del PBI invertido en educación por parte del Estado
+```{r}
+##Primero identificamos la variable, si nuestra variable se encuentra en numérica, los estadístictos descriptivos a modo de summary.
+class(datamerge$gastoedu)
+summary(datamerge$gastoedu)
+table(datamerge$gastoedu)
+
+#Ahora pedimos algunos estadísticos descriptivos en particular. Si bien también los tenemos en summary, pedimos la mediana, la desviación estándar.
+median(datamerge$gastoedu,na.rm=T)
+mean(datamerge$gastoedu,na.rm=T)
+Mode(datamerge$gastoedu,na.rm=T)
+sd(datamerge$gastoedu,na.rm=T)
+
+#Para visualizar los descriptivos de manera más clara
+table1::label(datamerge$gastoedu) <- "Porcentaje del PBI invertido en educación por parte del Estado"
+table1::table1(~PBIPC, data = datamerge, )
+
+#Ahora, procedemos a realizar nuestro primer gráfico: Histograma de la variable
+graficogastoedu <- (datamerge$gastoedu)
+hist(graficogastoedu, col= rainbow(10),xlab="Porcentaje de inversión en educación por parte del Estado", main="PORCENTAJE DE INVERSIÓN ESTATAL EN EDUCACIÓN POR PAÍS")
+
+#Haremos nuestro segundo gráfico: Boxplot de la variable. Esto nos servirá para ver cómo se distribuyen los casos.
+boxplot(datamerge$gastoedu, main="BOXPLOT DE PORCENTAJE DE INVERSIÓN ESTATAL EN EDUCACIÓN POR PAÍS", col="light green",xlab="países", ylab="Porcentaje de inversión en educación por parte del Estado")
+```
+
+
+6. Variable Ratio de estudiantes por profesor
+```{r}
+##Primero identificamos la variable,si nuestra variable se encuentra en numérica, los estadístictos descriptivos a modo de summary.
+class(datamerge$profxes)
+summary(datamerge$profxes)
+table(datamerge$profxes)
+
+#Ahora pedimos algunos estadísticos descriptivos en particular. Si bien también los tenemos en summary, pedimos la mediana, la desviación estándar.
+median(datamerge$profxes,na.rm=T)
+mean(datamerge$profxes,na.rm=T)
+Mode(datamerge$profxes,na.rm=T)
+sd(datamerge$profxes,na.rm=T)
+
+#Para visualizar los descriptivos de manera más clara
+table1::label(datamerge$profxes) <- "Ratio de estudiantes por maestro"
+table1::table1(~profxes, data = datamerge, )
+
+#Ahora, procedemos a realizar nuestro primer gráfico: Histograma de la variable
+graficoprofxes <- (datamerge$profxes)
+hist(graficoprofxes, col= rainbow(10), 
+     ylab="Países",
+     xlab="Cantidad de estudiantes por profesor",
+     main="CANTIDAD DE ESTUDIANTES EN EDUCACIÓN SECUNDARIA POR PROFESOR POR PAÍSES")
+#Haremos nuestro segundo gráfico: Boxplot de la variable. Esto nos servirá para ver cómo se distribuyen los casos.
+boxplot(datamerge$profxes, main="BOXPLOT DE CANTIDAD DE ESTUDIANTES EN EDUCACIÓN SECUNDARIA POR PROFESOR POR PAÍSES ", col="paleturquoise", xlab="países", ylab="Cantidad de estudiantes por profesor")
+     
+```
+
+
+7. Variable Porcentaje de jóvenes que consumen alcohol
+```{r}
+##Primero identificamos la variable,si nuestra variable se encuentra en numérica, los estadístictos descriptivos a modo de summary.
+class(datamerge$totalAC)
+summary(datamerge$totalAC)
+table(datamerge$totalAC)
+
+#Ahora pedimos algunos estadísticos descriptivos en particular. Si bien también los tenemos en summary, pedimos la mediana, la desviación estándar.
+median(datamerge$totalAC,na.rm=T)
+mean(datamerge$totalAC,na.rm=T)
+Mode(datamerge$totalAC,na.rm=T)
+sd(datamerge$totalAC,na.rm=T)
+
+#Para visualizar los descriptivos de manera más clara
+table1::label(datamerge$totalAC) <- "Porcentaje de jóvenes que consumen alcohol"
+table1::table1(~totalAC, data = datamerge, )
+
+#Ahora, procedemos a realizar nuestro primer gráfico: Histograma de la variable
+graficototalAC <- (datamerge$totalAC)
+hist(graficototalAC, col= rainbow(10), 
+     xlab="Porcentaje de jovenes que consumen alcohol",
+     ylab="Países",
+     main="PORCENTAJE DE JOVENES QUE CONSUMEN ALCOHOL POR PAÍS")
+#Haremos nuestro segundo gráfico: Boxplot de la variable. Esto nos servirá para ver cómo se distribuyen los casos.
+boxplot(datamerge$totalAC, main="BOXPLOT DE PORCENTAJE DE JÓVENES QUE CONSUMEN ALCOHOL POR PAÍS  ", col="Skyblue",
+        xlab="países", ylab="Porcentaje de jovenes que consumen alcohol")
+```
+
+
+8. Variable Porcentaje de natalidad por cada 1000 mujeres de 15 a 19 años por país
+```{r}
+##Primero identificamos la variable,si nuestra variable se encuentra en numérica, los estadístictos descriptivos a modo de summary.
+class(datamerge$rateper1000AP)
+summary(datamerge$rateper1000AP)
+table(datamerge$rateper1000AP)
+
+#Ahora pedimos algunos estadísticos descriptivos en particular. Si bien también los tenemos en summary, pedimos la mediana, la desviación estándar.
+median(datamerge$rateper1000AP,na.rm=T)
+mean(datamerge$rateper1000AP,na.rm=T)
+Mode(datamerge$rateper1000AP,na.rm=T)
+sd(datamerge$rateper1000AP,na.rm=T)
+
+#Para visualizar los descriptivos de manera más clara
+table1::label(datamerge$rateper1000AP) <- "Porcentaje de natalidad por cada 1000 mujeres de 15 a 19 años"
+table1::table1(~rateper1000AP, data = datamerge, )
+
+#Ahora, procedemos a realizar nuestro primer gráfico: Histograma de la variable
+graficorateper1000AP<- (datamerge$rateper1000AP)
+hist(graficorateper1000AP, col= rainbow(10), 
+     xlab="Tasa de natalidad por cada 1000 mujeres de 15 a 19 años",
+     ylab="Países",
+     main="TASA DE NATALIDAD POR 1000 MUJERES DE 15 A 19 AÑOS POR PAÍS")
+#Haremos nuestro segundo gráfico: Boxplot de la variable. Esto nos servirá para ver cómo se distribuyen los casos.
+boxplot(datamerge$rateper1000AP, main="BOXPLOT DE NATALIDAD POR 1000 MUJERES DE 15 A 19 AÑOS POR PAÍS", col="goldenrod",xlab="países", ylab="Tasa de natalidad por 1000 mujeres de 15 a 19 años")
+```
+
+
+*ANÁLISIS BIVARIADO*
+
+V. EXPLICADA = Porcentaje de estudiantes matriculados en educación secundaria por país 
+VARIABLES EXPLICATIVAS: 
+
+A)v. EXPLICATIVA1= PBI per cápita por país (nominal)
+```{r}
+attach(datamerge)
+#Primero realizamos el gráfico de dispersión
+plot(datamerge$Matricula,datamerge$PBIPC, xlab="Porcentaje de alumnos matriculados", 
+     ylab="PBI-percapita", main="Análisis bivariado entre el porcentaje de alumnos matriculados y el PBI-percapita")
+#Procedemos a realizar la prueba de correlación de Pearson
+cor.test(datamerge$Matricula, datamerge$PBIPC)
+```
+B)v. EXPLICATIVA2= Porcentaje de la población bajo la línea nacional de pobreza
+```{r}
+#Primero realizamos el gráfico de dispersión
+plot(datamerge$Matricula, datamerge$Pobreza,xlab="Porcentaje de estudiantes matriculados", 
+     ylab="Porcentaje de la población debajo de la línea de pobreza por país", main="Análisis bivariado entre el % de alumnos matriculados en el nivel secundario y el % de la población debajo de la línea de pobreza por país")
+#Procedemos a realizar la prueba de correlación de Pearson
+cor.test(datamerge$Matricula, datamerge$Pobreza)
+```
+C)v. EXPLICATIVA3= Porcentaje de población urbana por país.
+```{r}
+#Primero realizamos el gráfico de dispersión
+plot(datamerge$Matricula, datamerge$URBANO,xlab="Porcentaje de estudiantes matriculados en educación secundaria", 
+     ylab="Porcentaje de población urbana", main="Análisis bivariado entre el % de estudiantes inscritos en el nivel secundario y el % de la población urbana")
+#Procedemos a realizar la prueba de correlación de Pearson
+cor.test(datamerge$Matricula, datamerge$URBANO)
+```
+D)v. EXPLICATIVA4= Porcentaje de población femenina por país
+```{r}
+#Primero realizamos el gráfico de dispersión
+plot(datamerge$Matricula, datamerge$SEXO,xlab="Porcentaje de estudiantes matriculados en educación secundaria", 
+     ylab="Porcentaje de población femenina", main="Análisis bivariado entre el % de estudiantes matriculados en el nivel secundario y el % de la población femenina")
+#Procedemos a realizar la prueba de correlación de Pearson
+cor.test(datamerge$Matricula, datamerge$SEXO)
+```
+E)v. EXPLICATIVA5= Porcentaje del PBI invertido en educación por parte del Estado
+```{r}
+#Primero realizamos el gráfico de dispersión
+plot(datamerge$Matricula,datamerge$gastoedu,xlab="Porcentaje de estudiantes matriculados en el nivel secundario", 
+     ylab="Porcentaje de gasto en educación", main="Análisis bivariado entre el porcentaje de alumnos matriculados y el porcentaje de gasto en educación")
+#Procedemos a realizar la prueba de correlación de Pearson
+cor.test(datamerge$Matricula, datamerge$gastoedu)
+```
+F) v. EXPLICATIVA6= Ratio de estudiantes por profesor
+```{r}
+#Primero realizamos el gráfico de dispersión
+plot(datamerge$Matricula,datamerge$profxes,xlab="Porcentaje de estudiantes matriculados en el nivel secundario", 
+     ylab="Porporción de estudiantes por profesor", main="Análisis bivariado entre el % de alumnos matriculados en educación secundaria y la proporción de alumnos por profesor")
+#Procedemos a realizar la prueba de correlación de Pearson
+cor.test(datamerge$Matricula,datamerge$profxes)
+```
+G) v. EXPLICATIVA7= Porcentaje de jóvenes que consumen alcohol
+```{r}
+#Primero realizamos el gráfico de dispersión
+plot(datamerge$Matricula,datamerge$totalAC,xlab="Porcentaje de estudiantes matriculados en educación secundaria", 
+     ylab="Porcentaje de consumo de alcohol", main="Análisis bivariado entre el porcentaje de alumnos matriculados en el nivel secundario y el porcentaje de consumo de alcohol")
+#Procedemos a realizar la prueba de correlación de Pearson
+cor.test(datamerge$Matricula,datamerge$totalAC)
+```
+H) v. EXPLICATIVA8= Porcentaje de natalidad por cada 1000 mujeres de 15 a 19 años por país
+```{r}
+#Primero realizamos el gráfico de dispersión
+plot(datamerge$Matricula,datamerge$rateper1000AP,xlab="Porcentaje de estudiantes matriculados en el nivel secundario", ylab="Tasa de natalidad adolescente por cada 1000 mujeres", main="Análisis bivariado entre el % de estudiantes matriculados en educación secundaria y la tasa de natalidad adolescente por cada 1000 mujeres")
+#Procedemos a realizar la prueba de correlación de Pearson
+cor.test(datamerge$Matricula,datamerge$rateper1000AP)
+```
