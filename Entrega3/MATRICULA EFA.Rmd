@@ -1,0 +1,176 @@
+---
+title: "GRUPO 1"
+output:
+  html_document:
+    df_print: paged
+---
+
+Nombre de base de datos: matricula
+
+Variable explicada: Porcentaje de inscripción escolar (matricula) secundaria neta por país
+
+
+## SELECCIÓN DE DATA 
+
+Abrimos la base de datos:
+
+```{r}
+library(rio)
+library(htmltab)
+link="https://github.com/alessiasibille17/Trabajo_Stad/raw/master/entrega2_final/mergefinal.xlsx"
+matricula =import(link)
+head(matricula)
+```
+Limpiar la base datos
+```{r}
+matricula= na.omit(matricula) #omitimos los datos perdidos
+```
+
+Realizamos un subset y nos quedamos con las variables que utilizaremos. Lo llamaremos **subdata**:
+
+Eliminamos de esta nueva data "subdata" las variables "Pais" y "Sexo (variable control)"
+
+```{r}
+subdata<- matricula[,c(3:5, 7:10)]
+```
+
+--------------------------------------------------------------------
+
+## MATRIZ DE CORRELACIONES
+
+Generamos la matriz de correlaciones para identificar qué variables de nuestra subdata están correlacionadas. 
+
+```{r}
+library(polycor)
+matriz<-hetcor(subdata)
+matriz_corr<- matriz$correlations
+library(ggcorrplot)
+ggcorrplot(matriz_corr)
+```
+
+Vemos las correlaciones significativas: 
+
+```{r}
+ggcorrplot(matriz_corr,
+           p.mat = cor_pmat(matriz_corr),
+           insig = "blank")
+```
+Interpretación: A partir de este gráfico, se puede identificar la aparente existencia de cuatro grupos correlacionados.
+
+Parte exploratoria
+```{r}
+round(matriz_corr, 2)
+```
+
+## DIAGNÓSTICO DE MATRIZ DE CORRELACIONES 
+
+KMO (Test de Kaiser)
+```{r}
+library(psych)
+KMO(matriz_corr) 
+```
+A través de este test, se obtuvo un valor de 0.82 que es mayor a 0.5. Esto significa que la relación entre las variables es alta.
+
+Test de Bartlett
+
+- Test de Bartlett: H0: La matriz de correlacion es una matriz identidad.
+Buscamos rechazar la H0, por eso esperamos que sea signifitivo 
+
+```{r}
+cortest.bartlett(matriz_corr,n=nrow(subdata))$p.value>0.05
+```
+Escenario ideal: se rechaza la H0 (se obtiene FALSE)
+
+Test For Singular Square Matrix
+
+- Test For Singular Square Matrix: H0: La matriz de correlacion es una matriz singular.
+
+```{r}
+library(matrixcalc)
+is.singular.matrix(matriz_corr)
+```
+Escenario ideal: se rechaza la H0 (se obtiene FALSE)
+
+## IDENTIFICACIÓN DEL NÚMERO IDEAL DE FACTORES Y EFA
+
+DIAFRAMA DE SEDIMENTACIÓN
+```{r}
+fa.parallel(subdata,fm = 'ML', fa = 'fa')
+```
+Generación de factores
+
+```{r}
+library(GPArotation)
+factorial <- fa(subdata,nfactors = 2,cor = 'mixed',rotate = "varimax",fm="minres")
+```
+
+## VISUALIZACIÓN DEL EFA SOLICITADO
+
+a) Visualización del resultado inicial
+```{r}
+print(factorial$loadings)
+```
+
+b) Visualización del resultado con corte en 0.5 (resultado mejorado)
+```{r}
+print(factorial$loadings,cutoff = 0.5) ####correlación sin vías
+```
+
+DIAGRAMA DE VARIABLES LATENTES (FACTORES)
+```{r}
+fa.diagram(factorial)
+```
+
+## EVALUACIÓN DEL ANÁLISIS FACTORIAL EXPLORATORIO
+
+- ¿La Raíz del error cuadrático medio corregida está cerca a cero?
+
+```{r}
+factorial$crms
+```
+RPTA: se puede observar que el resultado sí está cerca a cero, pues se obtuvo un valor de 0.05368449.
+
+- ¿La Raíz del error cuadrático medio de aproximación es menor a 0.05?
+
+```{r}
+factorial$RMSEA
+```
+RPTA: 0.08003646 > 0.05 ---> Se reporta insuficiencia de validez. 
+
+- ¿El índice de Tucker-Lewis es mayor a 0.9?
+
+```{r}
+factorial$TLI
+```
+RPTA: El resultado obtenido (0.9536395) se traduce en un buen ajuste entre las variables. 
+
+- ¿Qué variables aportaron mas a los factores?
+
+```{r}
+sort(factorial$communality) ##permite ordenar de menor a mayor
+```
+. Las 3 variables que aportan más a los factores son: "totalAC", "PBIPC", "raterper100AP"
+. Las 3 variables que menos aportan a los factores son: "gastoedu", "profxes", "URBANO"
+
+- ¿Qué variables contribuyen a más de un factor?
+
+```{r}
+sort(factorial$complexity)
+```
+Se puede observar que la variable "URBANO" aporta a 1.98 factores, la variable "profxes" aporta a 1.60 factores, la variable "totalAC" aporta a 1.41 factores, etc.  
+
+## PROYECCIÓN DE VARIABLES
+
+```{r}
+factorial_casos<-as.data.frame(factorial$scores) 
+head(factorial_casos)
+summary(factorial_casos)
+```
+
+Inclusión de los factores creados al subset original
+
+```{r}
+subdata$factor1<- factorial_casos$MR1
+subdata$factor2<- factorial_casos$MR2
+```
+
